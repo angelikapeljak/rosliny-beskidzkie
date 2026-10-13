@@ -96,7 +96,7 @@ elif st.session_state.current_plant is not None:
 
   # Display the image
   try:
-    st.image(img_path, width=400, caption="What plant is this?")
+    st.image(img_path, width=400)
   except Exception:
     st.warning(
         f"Nie można załadować zdjęcia. Sprawdź ścieżkę w pliku plants.csv."
