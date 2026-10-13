@@ -104,7 +104,7 @@ elif st.session_state.current_plant is not None:
 
   # Quiz Form / Options
   with st.form("quiz_form"):
-    choice = st.radio("Wybierz odpowiedź:", st.session_state.options)
+    choice = st.radio("Wybierz odpowiedź:", st.session_state.options, index=None)
     submitted = st.form_submit_button("Sprawdź")
 
   if submitted:
