@@ -145,7 +145,7 @@ elif st.session_state.current_plant is not None:
     # Quiz Form / Options (Compatible with all Streamlit versions)
     with st.form("quiz_form"):
         # If index=None causes issues on older server versions, remove it or leave as is if Streamlit >= 1.33
-        choice = st.radio("Wybierz odpowiedź:", st.session_state.options, index=None if hasattr(st, "version") else 0)
+        choice = st.radio("Wybierz odpowiedź:", st.session_state.options, index=0)
         submitted = st.form_submit_button("Sprawdź")
 
     if submitted:
