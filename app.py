@@ -40,6 +40,10 @@ def get_plant_images(plant_id):
     image_extensions = ("jpg", "jpeg", "JPG", "JPEG", "png", "PNG")
     found_images = []
 
+    # Check if images directory exists first
+    if not os.path.exists("images"):
+        return []
+
     for ext in image_extensions:
         pattern_exact = os.path.join("images", f"{plant_id}.{ext}")
         pattern_prefix = os.path.join("images", f"{plant_id}_*.{ext}")
@@ -118,7 +122,7 @@ elif st.session_state.current_plant is not None:
     if "category" in plant and pd.notna(plant["category"]):
         st.sidebar.info(f"Kategoria: **{plant['category']}**")
 
-    # Display the found image(s)
+    # Display the found image(s) safely
     if img_paths:
         if len(img_paths) > 1:
             cols = st.columns(len(img_paths))
@@ -135,12 +139,13 @@ elif st.session_state.current_plant is not None:
                 st.warning("Nie można załadować zdjęcia.")
     else:
         st.warning(
-            f"Nie znaleziono zdjęć dla ID: {plant_id} w folderze images/ (szukano plików o nazwie np. {plant_id}.jpg lub {plant_id}_*.jpg)."
+            f"⚠️ Brak folderu 'images' lub nie znaleziono zdjęć dla ID: {plant_id} (szukano plików o nazwie np. {plant_id}.jpg lub {plant_id}_*.jpg)."
         )
 
-    # Quiz Form / Options
+    # Quiz Form / Options (Compatible with all Streamlit versions)
     with st.form("quiz_form"):
-        choice = st.radio("Wybierz odpowiedź:", st.session_state.options, index=None)
+        # If index=None causes issues on older server versions, remove it or leave as is if Streamlit >= 1.33
+        choice = st.radio("Wybierz odpowiedź:", st.session_state.options, index=None if hasattr(st, "version") else 0)
         submitted = st.form_submit_button("Sprawdź")
 
     if submitted:
