@@ -11,7 +11,7 @@ st.title("🌱 Rozpoznaj Beskidzkie Rośliny")
 @st.cache_data
 def load_data():
     df = pd.read_csv("plants.csv")
-    # Ensure column names match expectations
+    # Ensure column names match expectations (rename 'flower' to 'name' if necessary)
     if "flower" in df.columns and "name" not in df.columns:
         df = df.rename(columns={"flower": "name"})
     return df
@@ -37,10 +37,9 @@ if "seen_plants" not in st.session_state:
 
 # Helper function to find all images matching id XX.* or XX_*.*
 def get_plant_images(plant_id):
-    image_extensions = ("jpg", "jpeg", "JPG", "JPEG")
+    image_extensions = ("jpg", "jpeg", "JPG", "JPEG", "png", "PNG")
     found_images = []
 
-    # Search patterns: e.g., "images/1.*", "images/1_*"
     for ext in image_extensions:
         pattern_exact = os.path.join("images", f"{plant_id}.{ext}")
         pattern_prefix = os.path.join("images", f"{plant_id}_*.{ext}")
@@ -65,14 +64,17 @@ def get_next_question():
     st.session_state.current_plant = plant_row
 
     correct_name = plant_row["name"]
-    plant_category = plant_row["category"]
-
-    same_category_df = df[(df["category"] == plant_category) & (df["name"] != correct_name)]
-
-    if len(same_category_df) < 3:
-        wrong_pool = df[df["name"] != correct_name]
+    
+    # Optional category filtering if 'category' column exists
+    if "category" in df.columns:
+        plant_category = plant_row["category"]
+        same_category_df = df[(df["category"] == plant_category) & (df["name"] != correct_name)]
+        if len(same_category_df) < 3:
+            wrong_pool = df[df["name"] != correct_name]
+        else:
+            wrong_pool = same_category_df
     else:
-        wrong_pool = same_category_df
+        wrong_pool = df[df["name"] != correct_name]
 
     wrong_options = wrong_pool.sample(min(3, len(wrong_pool)))
 
@@ -112,8 +114,11 @@ elif st.session_state.current_plant is not None:
         current_progress / total_plants,
         text=f"Progress: {current_progress}/{total_plants} (Score: {st.session_state.score})",
     )
-    st.sidebar.info(f"Kategoria: **{plant['category']}**")
+    
+    if "category" in plant and pd.notna(plant["category"]):
+        st.sidebar.info(f"Kategoria: **{plant['category']}**")
 
+    # Display the found image(s)
     if img_paths:
         if len(img_paths) > 1:
             cols = st.columns(len(img_paths))
@@ -130,12 +135,11 @@ elif st.session_state.current_plant is not None:
                 st.warning("Nie można załadować zdjęcia.")
     else:
         st.warning(
-            f"Nie znaleziono zdjęć dla ID: {plant_id} w folderze images/."
+            f"Nie znaleziono zdjęć dla ID: {plant_id} w folderze images/ (szukano plików o nazwie np. {plant_id}.jpg lub {plant_id}_*.jpg)."
         )
 
     # Quiz Form / Options
     with st.form("quiz_form"):
-        # Note: index=None requires Streamlit >= 1.33.0
         choice = st.radio("Wybierz odpowiedź:", st.session_state.options, index=None)
         submitted = st.form_submit_button("Sprawdź")
 
