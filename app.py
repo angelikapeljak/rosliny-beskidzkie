@@ -16,9 +16,12 @@ def load_data():
         df = df.rename(columns={"flower": "name"})
     return df
 
-
-df = load_data()
-total_plants = len(df)
+try:
+  df = load_data()
+  total_plants = len(df)
+except Exception as e:
+  st.error(f"Błąd podczas ładowania pliku CSV: {e}")
+  st.stop()
 
 # Display total number of plants in the database
 st.sidebar.write(f"Liczba roślin w bazie: **{total_plants}**")
