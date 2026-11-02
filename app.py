@@ -9,8 +9,6 @@ st.title("🌱 Rozpoznaj Beskidzkie Rośliny")
 @st.cache_data
 def load_data():
     df = pd.read_csv("plants.csv")
-    # Filter out rows that don't have an image assigned
-    df = df.dropna(subset=["image_file"])
     return df
 
 df = load_data()
